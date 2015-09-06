@@ -1,0 +1,20 @@
+newsletter:
+    date: '2015-01-01'
+    from: 'test@dev-course.com'
+    webmaster: &id1
+        'webmaster@dev-course.com'
+    subject: 'This is a newsletter'
+    content: >
+      Dear user,
+
+      Welcome to our new newsletter system! This is our first newsletter and we will send you more
+
+      Regards,
+    email_list:
+      - *id1
+      - 'dan.gurgui@emag.ro'
+      - 'cristian.radulescu@emag.ro'
+      - 'asdasdd asd123 1r 1eqf qliviu.dima@emag@.ro'
+      - 'daniel.ianosi@emag.ro'
+      - 'cosmin.manciu@emag.ro'
+
