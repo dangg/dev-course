@@ -17,7 +17,7 @@ class EmailNewsletterCampaign
 
     /**
      * @ORM\Id
-     * @ORM\Column(name="id")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      *
      * @var int
@@ -98,5 +98,13 @@ class EmailNewsletterCampaign
     public function getNewsletterCampaign()
     {
         return $this->newsletterCampaign;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return (string) $this->getId();
     }
 }

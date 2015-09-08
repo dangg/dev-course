@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity
@@ -24,6 +25,8 @@ class NewsletterCampaign
      * @var string
      *
      * @ORM\Column(name="name", type="string")
+     * @Assert\Length(min="5", max="10")
+     * @Assert\NotNull
      */
     protected $name;
 
@@ -31,6 +34,7 @@ class NewsletterCampaign
      * @var string
      *
      * @ORM\Column(name="subject", type="string")
+     * @Assert\Length(min="5", max="10")
      */
     protected $subject;
 

@@ -3,10 +3,17 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\EmailNewsletterCampaign;
 use AppBundle\Entity\NewsletterCampaign;
+use AppBundle\Form\NewsletterCampaignFormType;
+use AppBundle\Service\Manager\NewsletterCampaignManager;
 use AppBundle\Service\NewsletterSender;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\TwigBundle\TwigEngine;
+use Symfony\Component\Form\FormFactory;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Yaml\Parser;
 use Symfony\Component\Routing\Annotation\Route;
 use JMS\DiExtraBundle\Annotation\Service;
@@ -24,11 +31,68 @@ class NewsletterController
     public $newsletterSender;
 
     /**
-     * @DI\Inject("doctrine.orm.default_entity_manager")
+     * @DI\Inject("app.newsletter_campaign_manager")
      *
-     * @var EntityManager
+     * @var NewsletterCampaignManager
      */
-    public $entityManager;
+    public $newsletterCampaignManager;
+
+    /**
+     * @DI\Inject("twig")
+     *
+     * @var TwigEngine
+     */
+    public $twig;
+
+    /**
+     * @DI\Inject("form.factory")
+     *
+     * @var FormFactory
+     */
+    public $formFactory;
+
+    /**
+     * @DI\Inject("session")
+     *
+     * @var Session
+     */
+    public $session;
+
+    /**
+     * @Route("/newsletter/new", name="newsletter_new")
+     *
+     * @return Response
+     *
+     *
+     * @throws \Exception
+     * @throws \Twig_Error
+     */
+    public function newAction(Request $request)
+    {
+        $resolvedForm = $this->formFactory->create(
+            new NewsletterCampaignFormType()
+        );
+        if ($request->isMethod("POST"))
+        {
+            $resolvedForm->handleRequest($request);
+            if ($resolvedForm->isValid()) {
+                $newsletterCampaign = $resolvedForm->getData();
+                $this->newsletterCampaignManager->save($newsletterCampaign);
+                $this->session->getFlashBag()->set('message', 'Saved!');
+            }
+        }
+
+        return new Response(
+            $this->twig->render(
+                'AppBundle:Newsletter:new.html.twig',
+                array(
+                    'form' => $resolvedForm->createView(),
+                    ''
+                )
+            )
+        );
+    }
+
 
     public function saveAction()
     {
