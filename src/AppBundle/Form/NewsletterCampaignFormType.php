@@ -2,6 +2,7 @@
 
 
 namespace AppBundle\Form;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -20,8 +21,17 @@ class NewsletterCampaignFormType extends AbstractType
         $builder
             ->add('name')
             ->add('subject')
-            ->add('emailNewsletterCampaigns', 'collection', array(
-                'type' => new EmailNewsletterCampaignType()
+            ->add('emails', 'entity', array(
+                'class' => 'AppBundle:Email',
+                'mapped' => false, // don't map with any field on the object NewsletterCampaign
+                'multiple' => true, // Allow selecting more than one email
+                'expanded' => true, // Expand the list of all emails so it can be seen easily
+                'data' => $options['emails']
+            ))
+            ->add('emailNew', 'collection', array(
+                'type' => new EmailType(),
+                'mapped' => false,
+                'allow_add' => true,
             ))
             ->add('save', 'submit');
     }
@@ -35,6 +45,7 @@ class NewsletterCampaignFormType extends AbstractType
             array(
                 'csrf_protection' => false,
                 'data_class' => 'AppBundle\Entity\NewsletterCampaign',
+                'emails' => array()
             )
         );
     }

@@ -27,7 +27,8 @@ class EmailNewsletterCampaign
     /**
      * @ORM\ManyToOne(
      *      targetEntity="Email",
-     *      inversedBy="emailNewsletterCampaigns"
+     *      inversedBy="emailNewsletterCampaigns",
+     *      cascade={"persist"}
      *  )
      *
      * @var Email

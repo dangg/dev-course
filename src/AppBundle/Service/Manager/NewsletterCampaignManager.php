@@ -2,7 +2,10 @@
 
 
 namespace AppBundle\Service\Manager;
+use AppBundle\Entity\Email;
+use AppBundle\Entity\EmailNewsletterCampaign;
 use AppBundle\Entity\NewsletterCampaign;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use JMS\DiExtraBundle\Annotation as DI;
 use JMS\DiExtraBundle\Annotation\Service;
@@ -29,6 +32,13 @@ class NewsletterCampaignManager
      */
     public $validator;
 
+    public function saveWithEmails(
+        NewsletterCampaign $newlsetterCampaign,
+        $emails
+    ) {
+        $this->save($newlsetterCampaign);
+        $this->addEmailsToNewsletterCampaign($newlsetterCampaign, $emails);
+    }
     /**
      * @param NewsletterCampaign $newsletterCampaign
      *
@@ -43,5 +53,41 @@ class NewsletterCampaignManager
 
         $this->entityManager->persist($newsletterCampaign);
         $this->entityManager->flush();
+    }
+
+    /**
+     * @param NewsletterCampaign $newsletterCampaign
+     * @param $emails
+     */
+    public function addEmailsToNewsletterCampaign(NewsletterCampaign $newsletterCampaign, $emails)
+    {
+        foreach ($emails as $email)
+        {
+            if ($this->newsletterCampaignHasEmail($newsletterCampaign, $email)) {
+
+            }
+            $emailNewsletterCampaign = new EmailNewsletterCampaign();
+            $emailNewsletterCampaign->setEmail($email);
+            $emailNewsletterCampaign->setNewsletterCampaign($newsletterCampaign);
+            $this->entityManager->persist($emailNewsletterCampaign);
+        }
+        $this->entityManager->flush();
+    }
+
+    /**
+     * @param NewsletterCampaign $newsletterCampaign
+     * @param $email
+     * @return bool
+     */
+    public function newsletterCampaignHasEmail(NewsletterCampaign $newsletterCampaign, $email)
+    {
+        foreach ($newsletterCampaign->getEmailNewsletterCampaigns() as $emailNewsletterCampaign)
+        {
+            if ($emailNewsletterCampaign->getEmail()->getValue() === $email->getValue())
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

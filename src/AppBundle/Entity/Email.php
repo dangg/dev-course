@@ -132,4 +132,12 @@ class Email
     {
         $this->emailNewsletterCampaigns->removeElement($emailNewsletterCampaigns);
     }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getValue();
+    }
 }

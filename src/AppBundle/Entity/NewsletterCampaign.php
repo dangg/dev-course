@@ -41,7 +41,8 @@ class NewsletterCampaign
     /**
      * @ORM\OneToMany(
      *      targetEntity="EmailNewsletterCampaign",
-     *      mappedBy="newsletterCampaign"
+     *      mappedBy="newsletterCampaign",
+     *      cascade={"persist"}
      * )
      * @ORM\JoinColumn(
      *      name="id",
@@ -148,5 +149,26 @@ class NewsletterCampaign
     public function getEmailNewsletterCampaigns()
     {
         return $this->emailNewsletterCampaigns;
+    }
+
+    public function getAssociatedEmails()
+    {
+        $emails = array();
+        foreach ($this->getEmailNewsletterCampaigns() as $campaign)
+        {
+            $emails[] = $campaign->getEmail();
+        }
+        return $emails;
+    }
+
+    /**
+     * @param EmailNewsletterCampaign[]|array|ArrayCollection $emailNewsletterCampaigns
+     *
+     * @return $this
+     */
+    public function setEmailNewsletterCampaigns($emailNewsletterCampaigns)
+    {
+        $this->emailNewsletterCampaigns = $emailNewsletterCampaigns;
+        return $this;
     }
 }
