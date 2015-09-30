@@ -8,9 +8,11 @@ use AppBundle\Entity\NewsletterCampaign;
 use AppBundle\Form\NewsletterCampaignFormType;
 use AppBundle\Service\Manager\NewsletterCampaignManager;
 use AppBundle\Service\NewsletterSender;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bundle\TwigBundle\TwigEngine;
 use Symfony\Component\Form\FormFactory;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -59,6 +61,47 @@ class NewsletterController
     public $session;
 
     /**
+     * @DI\Inject("doctrine.orm.default_entity_manager")
+     *
+     * @var EntityManager
+     *
+     */
+    public $entityManager;
+
+    /**
+     *
+     * @Route("/newsletter/list", name="newsletter_list")
+     * @param Request $request
+     * @return Response
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function listAction(Request $request)
+    {
+
+
+        $newsletterCampaigns = $this->entityManager->getRepository(
+            'AppBundle:NewsletterCampaign'
+        )->findBy(array(
+            'id' => 1
+        ));
+        /**
+         * @var NewsletterCampaign $campaign
+         */
+        foreach ($newsletterCampaigns as $campaign)
+        {
+            //echo $campaign->getEmailNewsletterCampaigns()->count();
+            //echo $campaign->getEmailNewsletterCampaigns()->count();
+            echo "<br/>";
+        }
+
+        return new Response(
+            $this->twig->render(
+                'AppBundle:Newsletter:list.html.twig'
+            )
+        );
+    }
+
+    /**
      * @Route("/newsletter/new", name="newsletter_new")
      *
      * @return Response
@@ -76,12 +119,84 @@ class NewsletterController
         {
             $resolvedForm->handleRequest($request);
             if ($resolvedForm->isValid()) {
+                foreach($resolvedForm->get('emailNew')->all() as $newEmail) {
+
+                    if (!is_null($newEmail->get('companyNew')->getData()))
+                    {
+                        $newEmail->getData()->setCompany(
+                            $newEmail->get('companyNew')->getData()[0]
+                        );
+                    }
+                }
                 $newsletterCampaign = $resolvedForm->getData();
-                $this->newsletterCampaignManager->save($newsletterCampaign);
+                $this->newsletterCampaignManager->saveWithEmails(
+                    $newsletterCampaign, new ArrayCollection(
+                        array_merge(
+                            $resolvedForm->get('emails')->getData()->toArray(),
+                            $resolvedForm->get('emailNew')->getData()
+                        )
+                    ),
+                    $resolvedForm->get('type')->getData()
+                );
                 $this->session->getFlashBag()->set('message', 'Saved!');
+
+                return new RedirectResponse('/newsletter/edit/' . $newsletterCampaign->getId());
             }
         }
 
+        return new Response(
+            $this->twig->render(
+                'AppBundle:Newsletter:new.html.twig',
+                array(
+                    'form' => $resolvedForm->createView()
+                )
+            )
+        );
+    }
+
+    /**
+     * @Route("/newsletter/edit/{id}", name="newsletter_edit")
+     *
+     * @return Response
+     *
+     *
+     * @throws \Exception
+     * @throws \Twig_Error
+     */
+    public function editAction(Request $request)
+    {
+        $newsletterCampaign = $this->entityManager->getRepository('AppBundle:NewsletterCampaign')->find(
+            $request->get('id')
+        );
+        $resolvedForm = $this->formFactory->create(
+            new NewsletterCampaignFormType(),
+            $newsletterCampaign,
+            array(
+                'emails' => $newsletterCampaign->getAssociatedEmails()
+            )
+        );
+        if ($request->isMethod("POST")) {
+            $resolvedForm->handleRequest($request);
+            if ($resolvedForm->isValid()) {
+
+                $newsletterCampaign = $resolvedForm->getData();
+                $this->newsletterCampaignManager->save($newsletterCampaign);
+                $this->newsletterCampaignManager->addEmailsToNewsletterCampaign(
+                    $newsletterCampaign,
+                    $resolvedForm->get('emails')->getData(),
+                    $resolvedForm->get('type')->getData()
+
+                );
+                $this->newsletterCampaignManager->addEmailsToNewsletterCampaign(
+                    $newsletterCampaign,
+                    $resolvedForm->get('emailNew')->getData(),
+                    $resolvedForm->get('type')->getData()
+
+                );
+                $this->session->getFlashBag()->set('message', 'Saved!');
+                return new RedirectResponse('/newsletter/edit/' . $newsletterCampaign->getId());
+            }
+        }
         return new Response(
             $this->twig->render(
                 'AppBundle:Newsletter:new.html.twig',

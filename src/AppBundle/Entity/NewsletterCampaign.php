@@ -12,6 +12,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class NewsletterCampaign
 {
+    use Modifiable;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -41,7 +43,9 @@ class NewsletterCampaign
     /**
      * @ORM\OneToMany(
      *      targetEntity="EmailNewsletterCampaign",
-     *      mappedBy="newsletterCampaign"
+     *      mappedBy="newsletterCampaign",
+     *      cascade={"persist"},
+     *      fetch="EXTRA_LAZY"
      * )
      * @ORM\JoinColumn(
      *      name="id",
@@ -51,6 +55,13 @@ class NewsletterCampaign
      * @var EmailNewsletterCampaign[]|ArrayCollection|array
      */
     protected $emailNewsletterCampaigns;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="date_sent", type="datetime")
+     */
+    protected $dateSent;
 
     /**
      * @return int
@@ -148,5 +159,45 @@ class NewsletterCampaign
     public function getEmailNewsletterCampaigns()
     {
         return $this->emailNewsletterCampaigns;
+    }
+
+    public function getAssociatedEmails()
+    {
+        $emails = array();
+        foreach ($this->getEmailNewsletterCampaigns() as $campaign)
+        {
+            $emails[] = $campaign->getEmail();
+        }
+        return $emails;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getDateSent()
+    {
+        return $this->dateSent;
+    }
+
+    /**
+     * @param \DateTime $dateSent
+     *
+     * @return $this
+     */
+    public function setDateSent($dateSent)
+    {
+        $this->dateSent = $dateSent;
+        return $this;
+    }
+
+    /**
+     * @param EmailNewsletterCampaign[]|array|ArrayCollection $emailNewsletterCampaigns
+     *
+     * @return $this
+     */
+    public function setEmailNewsletterCampaigns($emailNewsletterCampaigns)
+    {
+        $this->emailNewsletterCampaigns = $emailNewsletterCampaigns;
+        return $this;
     }
 }

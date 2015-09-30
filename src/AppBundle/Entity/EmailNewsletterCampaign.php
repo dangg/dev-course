@@ -27,7 +27,8 @@ class EmailNewsletterCampaign
     /**
      * @ORM\ManyToOne(
      *      targetEntity="Email",
-     *      inversedBy="emailNewsletterCampaigns"
+     *      inversedBy="emailNewsletterCampaigns",
+     *      cascade={"persist"}
      *  )
      *
      * @var Email
@@ -43,6 +44,15 @@ class EmailNewsletterCampaign
      * @var NewsletterCampaign
      */
     protected $newsletterCampaign;
+
+    /**
+     * @var
+     */
+    protected $type;
+
+    const CAMPAIGN_TYPE_NORMAL = 'normal';
+
+    const CAMPAIGN_TYPE_TEST = 'test';
 
     /**
      * Get id
@@ -106,5 +116,24 @@ class EmailNewsletterCampaign
     public function __toString()
     {
         return (string) $this->getId();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param mixed $type
+     *
+     * @return $this
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+        return $this;
     }
 }

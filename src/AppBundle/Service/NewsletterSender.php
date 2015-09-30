@@ -9,9 +9,5 @@ use JMS\DiExtraBundle\Annotation\Service;
  */
 class NewsletterSender
 {
-    public function test()
-    {
-        echo "A";
-    }
 
 }

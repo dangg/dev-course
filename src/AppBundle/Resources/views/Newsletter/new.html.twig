@@ -1,2 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ro" lang="ro">
+<head>
+<style type="text/css">
 
-{{ form(form) }}
+</style>
+</head>
+
+<body>
+
+
+{% form_theme form _self %}
+
+
+{{ form_start(form) }}
+{% block _newsletter_campaign_form_emails_block_widget %}
+    {% if prototype is defined %}
+        {%- set attr = attr|merge({'data-prototype': form_row(prototype) }) -%}
+    {% endif %}
+    <div {{ block('widget_container_attributes') }}>
+        {%- if form.parent is empty -%}
+            {{ form_errors(form) }}
+        {%- endif -%}
+
+
+        {% for child in form -%}
+                <div>
+                    {{ form_widget(child) }}
+                    {{ form_label(child) }}
+                    {% if child.errors is defined %}
+                    {%- if child.errors|length > 0 -%}
+                        <ul>
+                            {%- for error in child.errors -%}
+                                <li>{{ error.message }}</li>
+                            {%- endfor -%}
+                        </ul>
+                    {%- endif -%}
+                    {% endif %}
+                </div>
+        {%- endfor %}
+    </div>
+{% endblock %}
+{{ form_end(form) }}
+
+
+
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script>
+
+    var $collectionHolder;
+
+    // setup an "add a tag" link
+    var $addEmailLink = $('<a href="#" class="add_tag_link">Add a email</a>');
+    var $addCompanyLink = $('<a href="#" class="add_company_link">Add a company</a>');
+    var $addProductLink = $('<a href="#" class="add_product_link">Add a new Product</a>');
+
+    var $newLinkLi = $('<li></li>').append($addEmailLink);
+
+    jQuery(document).ready(function() {
+        // Get the ul that holds the collection of tags
+        $collectionHolder = $('#newsletter_campaign_form_emailNew');
+
+        // add the "add a tag" anchor and li to the tags ul
+        $collectionHolder.append($newLinkLi);
+
+        // count the current form inputs we have (e.g. 2), use that as the new
+        // index when inserting a new item (e.g. 2)
+        $collectionHolder.data('index', $collectionHolder.find(':input').length);
+        $addCompanyLink.on(
+                'click', function (e) {
+                    e.preventDefault();
+                    $(".new_company").append($(".new_company").data("prototype"));
+                    $(".new_company").append($addProductLink);
+                }
+        );
+
+        $addEmailLink.on('click', function(e) {
+            // prevent the link from creating a "#" on the URL
+            e.preventDefault();
+
+            // add a new tag form (see next code block)
+            addTagForm($collectionHolder, $newLinkLi);
+        });
+        $addProductLink.on('click', function(e)
+        {
+            e.preventDefault();
+            $(".product_type").append($(".product_type").data("prototype"));
+
+        })
+    });
+
+    function addTagForm($collectionHolder, $newLinkLi) {
+        // Get the data-prototype explained earlier
+        var prototype = $collectionHolder.data('prototype');
+
+        // get the new index
+        var index = $collectionHolder.data('index');
+
+        // Replace '__name__' in the prototype's HTML to
+        // instead be a number based on how many items we have
+        var newForm = prototype.replace(/__name__/g, index);
+
+        // increase the index with one for the next item
+        $collectionHolder.data('index', index + 1);
+
+        // Display the form in the page in an li, before the "Add a tag" link li
+        var $newFormLi = $('<li></li>').append(newForm);
+        $newFormLi.append($addCompanyLink);
+
+        $newLinkLi.before($newFormLi);
+    }
+</script>
+</body>
+</html>

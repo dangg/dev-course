@@ -20,6 +20,7 @@ class AppKernel extends Kernel
             new JMS\AopBundle\JMSAopBundle(),
 
             new AppBundle\AppBundle(),
+            new \UserBundle\UserBundle()
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {

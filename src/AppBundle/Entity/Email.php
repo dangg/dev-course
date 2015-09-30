@@ -17,7 +17,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Email
 {
-
     /**
      * @var int
      * @ORM\Id
@@ -46,6 +45,28 @@ class Email
      * )
      */
     protected $emailNewsletterCampaigns;
+
+    /**
+     * @var Company
+     *
+     * @ORM\ManyToOne(
+     *      targetEntity="Company",
+     *      inversedBy="emails",
+     *      cascade={"persist"}
+     *  )
+     * @ORM\JoinColumn(
+     *      name="company_id",
+     *      referencedColumnName="id"
+     * )
+     */
+    protected $company;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="email_cc", type="string")
+     */
+    protected $ccEmail;
 
     public function __construct()
     {
@@ -131,5 +152,51 @@ class Email
     public function removeEmailNewsletterCampaign(\AppBundle\Entity\EmailNewsletterCampaign $emailNewsletterCampaigns)
     {
         $this->emailNewsletterCampaigns->removeElement($emailNewsletterCampaigns);
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getValue();
+    }
+
+    /**
+     * @return Company
+     */
+    public function getCompany()
+    {
+        return $this->company;
+    }
+
+    /**
+     * @param Company $company
+     *
+     * @return $this
+     */
+    public function setCompany($company)
+    {
+        $this->company = $company;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCcEmail()
+    {
+        return $this->ccEmail;
+    }
+
+    /**
+     * @param string $ccEmail
+     *
+     * @return $this
+     */
+    public function setCcEmail($ccEmail)
+    {
+        $this->ccEmail = $ccEmail;
+        return $this;
     }
 }
